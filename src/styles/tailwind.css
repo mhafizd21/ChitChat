@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.text-xxs {
+  font-size: 0.6rem;
+  line-height: 0.75rem;
+}
+
+.btn {
+  @apply font-bold py-2 px-3 rounded flex;
+  max-height: 44px;
+  height: 44px;
+  cursor: pointer;
+}
+
+.btn-primary {
+  @apply bg-green-400 text-gray-50 hover:bg-green-500;
+}
+
+.btn-outline-primary {
+  @apply border border-green-400 text-green-600 hover:bg-green-500 hover:text-gray-100;
+}
