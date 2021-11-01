@@ -1,20 +1,57 @@
-import React from 'react';
-import { auth } from 'firebase';
-import ChatRoom from 'pages/ChatRoom/ChatRoom';
-import Login from 'pages/Login/Login';
-import { useAuthState } from 'react-firebase9-hooks/auth';
+import Layout from 'components/Layout';
+import Preloader from 'components/Preloader';
+import routes from 'config/routes';
+import utils from 'config/utils';
+import React, { lazy } from 'react';
+import {
+  BrowserRouter, Redirect, Route, Switch,
+} from 'react-router-dom';
 import './styles/tailwind.css';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const App = () => {
-  const [user] = useAuthState(auth);
+const Login = lazy(() => import('./pages/Login/Login'));
 
-  return (
-    <div className="App">
-      <section>
-        {user ? <ChatRoom /> : <Login />}
-      </section>
-    </div>
-  );
-};
+const App = () => (
+  <>
+    <ToastContainer />
+    <BrowserRouter>
+      <Switch>
+        <Route
+          path="/login"
+          exact
+          render={() => {
+            if (utils.getToken()) {
+              return <Redirect to="/" />;
+            }
+            return (
+              <React.Suspense fallback={<Preloader />}>
+                <Login />
+              </React.Suspense>
+            );
+          }}
+        />
+        {routes.map(route => (
+          <Route
+            key={route.path}
+            path={route.path}
+            exact={route.exact}
+            render={() => {
+              if (utils.getToken()) {
+                document.title = `${route.title} | ChitChat`;
+                return (
+                  <React.Suspense fallback={<Preloader />}>
+                    <route.component />
+                  </React.Suspense>
+                );
+              }
+              return <Redirect to="/login" />;
+            }}
+          />
+        ))}
+      </Switch>
+    </BrowserRouter>
+  </>
+);
 
 export default App;

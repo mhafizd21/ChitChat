@@ -1,12 +1,22 @@
-import { auth } from 'firebase';
+import { auth } from 'config/firebase';
 import React, { FC, memo } from 'react';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth';
+import { useHistory } from 'react-router-dom';
+import utils from 'config/utils';
 import google from '../assets/google.svg';
 
 const SignIn: FC = () => {
+  const history = useHistory();
+
   const signInWithGoogle = () => {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider);
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        utils.setToken(user.uid);
+        history.push('/');
+      }
+    });
   };
 
   return (

@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
-import { auth } from 'firebase';
+import { auth } from 'config/firebase';
 import React, {
-  FC, memo, useEffect, useState,
+  FC, memo,
 } from 'react';
 
 const MessageContainer = styled.div`
@@ -43,22 +43,13 @@ const MessageStyled = styled.div`
   }
 `;
 
-const ChatMessage: FC<{ message: any; timeStamp: Date; }> = ({ message, timeStamp }) => {
+const ChatMessage: FC<{ message: any; timeStamp: Date | ''; }> = ({ message, timeStamp }) => {
   const {
     text, uid, photoURL, displayName,
   } = message;
   const isOwner = uid === auth.currentUser?.uid;
   const messageClass = isOwner ? 'sent' : 'received';
-  const [textColor, setTextColor] = useState('green');
   const sentAt = dayjs(timeStamp).format('HH:mm');
-
-  useEffect(() => {
-    const colors = ['red', 'yellow', 'green', 'blue', 'indigo', 'purple', 'pink'];
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    if (!textColor) {
-      setTextColor(randomColor);
-    }
-  }, [uid]);
 
   if (!timeStamp) {
     return null;
@@ -71,7 +62,7 @@ const ChatMessage: FC<{ message: any; timeStamp: Date; }> = ({ message, timeStam
       )}
       <MessageStyled className={clsx('mt-2 px-3 sm:px-4 rounded', isOwner ? 'bg-green-400 py-2 pl-5 pr-4' : 'bg-gray-300 py-1 pr-6')}>
         {!isOwner && (
-        <p className={`text-xs text-${textColor}-700 font-medium`}>
+        <p className="text-xs text-green-700 font-medium">
           {' '}
           {displayName}
           {' '}

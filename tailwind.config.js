@@ -1,6 +1,7 @@
 module.exports = {
   purge: ['./src/pages/**/*.{js,ts,jsx,tsx}'],
   darkMode: false, // or 'media' or 'class'
+  important: true,
   theme: {
     extend: {
       container: {
@@ -12,7 +13,10 @@ module.exports = {
     },
   },
   variants: {
-    extend: {},
+    extend: {
+      textColor: ['disabled'],
+      backgroundColor: ['disabled'],
+    },
   },
   plugins: [],
 };

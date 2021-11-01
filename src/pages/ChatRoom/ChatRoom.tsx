@@ -1,17 +1,30 @@
 import styled from '@emotion/styled';
+import SignOut from 'components/Layout/SignOut';
+import Preloader from 'components/Preloader';
+import Toast from 'components/Toast';
+import { auth, firestore } from 'config/firebase';
 import dayjs from 'dayjs';
-import { auth, firestore } from 'firebase';
 import { UserInfo } from 'firebase/auth';
 import {
-  addDoc, collection, limit, orderBy, query, serverTimestamp,
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  limit,
+  orderBy,
+  query,
+  serverTimestamp,
+  where,
 } from 'firebase/firestore';
 import React, {
-  FC, memo, useRef, useState,
+  FC, memo, useEffect, useRef, useState,
 } from 'react';
 import { useCollectionData } from 'react-firebase9-hooks/firestore';
+import { FaArrowLeft, FaLink } from 'react-icons/fa';
+import { useHistory, useParams } from 'react-router-dom';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import sentIcon from './assets/sent.svg';
 import ChatMessage from './components/ChatMessage';
-import SignOut from './components/SignOut';
 
 const InputStyled = styled.input`
   display: flex;
@@ -23,12 +36,31 @@ const InputStyled = styled.input`
 `;
 
 const ChatRoom: FC = () => {
+  const { id: roomId } = useParams<{ id: string }>();
+  const history = useHistory();
   const messageRef = collection(firestore, 'messages');
-  const queryMessage = query(messageRef, orderBy('createdAt'), limit(25));
-  const [messages] = useCollectionData<any>(queryMessage, { idField: 'id' });
+  const queryMessage = query(messageRef, where('roomId', '==', roomId), orderBy('createdAt'), limit(100));
+  const [messages, loading] = useCollectionData(queryMessage, { idField: 'id' });
   const [messageValue, setMessageValue] = useState('');
 
   const scrollPoint = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkRoom = async () => {
+      const docRef = doc(firestore, 'rooms', roomId);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        Toast({ message: "Couldn't find the room you're trying to join", type: 'error' });
+        history.push('/');
+      }
+    };
+
+    checkRoom();
+  }, []);
+
+  useEffect(() => {
+    scrollPoint.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const sendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,21 +75,37 @@ const ChatRoom: FC = () => {
         uid,
         photoURL,
         displayName,
-      });
-
-      scrollPoint.current?.scrollIntoView({ behavior: 'smooth' });
+        roomId,
+      })
+        .then(() => {
+          scrollPoint.current?.scrollIntoView({ behavior: 'smooth' });
+        });
     }
   };
 
   return (
     <>
-      <div className="sticky top-0 max-w-screen flex justify-between px-5 py-3 bg-white shadow-md z-10">
-        <h1 className="text-green-900 font-black">Chat Room</h1>
+      <header className="sticky top-0 max-w-screen flex justify-between px-5 py-3 bg-white shadow-md z-10">
+        <div className="flex items-center">
+          <button type="button" className="mr-4" onClick={() => history.push('/')}>
+            <FaArrowLeft className="text-green-700" />
+          </button>
+          <h1 className="text-green-600 font-black text-xl md:text-2xl">Chat Room</h1>
+          <CopyToClipboard
+            text={roomId}
+            onCopy={() => Toast({ message: 'Room Id Copied!', type: 'success' })}
+          >
+            <button type="button">
+              <FaLink className="text-green-700 ml-3" />
+            </button>
+          </CopyToClipboard>
+        </div>
         <SignOut />
-      </div>
+      </header>
       <div className="container px-5 pb-20 sm:pb-28">
+        {loading && <Preloader />}
         {messages?.map((message, id) => {
-          const timeStamp = new Date(message?.createdAt?.seconds * 1000);
+          const timeStamp = message?.createdAt ? new Date(message?.createdAt?.seconds * 1000) : '';
           const timeStampPrev = new Date(messages[id - 1]?.createdAt?.seconds * 1000);
           const messageDate = dayjs(timeStamp).format('DD MM YYYY');
           const prevMessageDate = dayjs(timeStampPrev).format('DD MM YYYY');
@@ -70,18 +118,21 @@ const ChatRoom: FC = () => {
             } if (countDiff < 24) {
               return 'Yesterday';
             }
+            if (!timeStamp) {
+              return null;
+            }
             return dayjs(timeStamp).format('DD MMM YYYY');
           };
 
           return (
-            <>
+            <div key={message.id}>
               {messageDate !== prevMessageDate && (
                 <div className="text-center mt-2 text-gray-700 text-sm">
                   {dateText()}
                 </div>
               )}
-              <ChatMessage key={message.id} message={message} timeStamp={timeStamp} />
-            </>
+              <ChatMessage message={message} timeStamp={timeStamp} />
+            </div>
           );
         })}
         <div ref={scrollPoint} />
