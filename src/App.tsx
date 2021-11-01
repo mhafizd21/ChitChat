@@ -1,4 +1,3 @@
-import Layout from 'components/Layout';
 import Preloader from 'components/Preloader';
 import routes from 'config/routes';
 import utils from 'config/utils';
@@ -6,9 +5,9 @@ import React, { lazy } from 'react';
 import {
   BrowserRouter, Redirect, Route, Switch,
 } from 'react-router-dom';
-import './styles/tailwind.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './styles/tailwind.css';
 
 const Login = lazy(() => import('./pages/Login/Login'));
 
