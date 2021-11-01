@@ -18,7 +18,7 @@ import { FaKeyboard } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 
 const SHome = styled.div`
-  height: calc(100vh - 48px);
+  height: calc(100vh - 56px);
 `;
 
 const Home: FC = () => {
