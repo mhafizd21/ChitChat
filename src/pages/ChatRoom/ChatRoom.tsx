@@ -18,7 +18,6 @@ import {
   where,
 } from 'firebase/firestore';
 import React, {
-  createRef,
   FC, memo, useEffect, useRef, useState,
 } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -47,7 +46,7 @@ const ChatRoom: FC = () => {
   const [messageValue, setMessageValue] = useState('');
 
   const scrollPoint = useRef<HTMLDivElement>(null);
-  const buttonCopyRef = createRef<HTMLButtonElement>();
+  const buttonCopyRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const checkRoom = async () => {
