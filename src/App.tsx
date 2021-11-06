@@ -7,50 +7,59 @@ import {
 } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import useStore from 'stores/store';
 import './styles/tailwind.css';
 
 const Login = lazy(() => import('./pages/Login/Login'));
 
-const App = () => (
-  <>
-    <ToastContainer />
-    <BrowserRouter>
-      <Switch>
-        <Route
-          path="/login"
-          exact
-          render={() => {
-            if (utils.getToken()) {
-              return <Redirect to="/" />;
-            }
-            return (
-              <React.Suspense fallback={<Preloader />}>
-                <Login />
-              </React.Suspense>
-            );
-          }}
-        />
-        {routes.map(route => (
+const App = () => {
+  const setAfterLoginPath = useStore(s => s.setAfterLoginPath);
+
+  return (
+    <>
+      <ToastContainer />
+      <BrowserRouter>
+        <Switch>
           <Route
-            key={route.path}
-            path={route.path}
-            exact={route.exact}
+            path="/login"
+            exact
             render={() => {
               if (utils.getToken()) {
-                document.title = `${route.title} | ChitChat`;
-                return (
-                  <React.Suspense fallback={<Preloader />}>
-                    <route.component />
-                  </React.Suspense>
-                );
+                return <Redirect to="/" />;
               }
-              return <Redirect to="/login" />;
+              return (
+                <React.Suspense fallback={<Preloader />}>
+                  <Login />
+                </React.Suspense>
+              );
             }}
           />
-        ))}
-      </Switch>
-    </BrowserRouter>
-  </>
-);
+          {routes.map(route => (
+            <Route
+              key={route.path}
+              path={route.path}
+              exact={route.exact}
+              render={() => {
+                if (utils.getToken()) {
+                  document.title = `${route.title} | ChitChat`;
+                  return (
+                    <React.Suspense fallback={<Preloader />}>
+                      <route.component />
+                    </React.Suspense>
+                  );
+                }
+                if (route.path === '/room/:id') {
+                  setAfterLoginPath(window.location.pathname);
+                }
+                return <Redirect to="/login" />;
+              }}
+            />
+          ))}
+          <Redirect from="*" to="/" />
+        </Switch>
+      </BrowserRouter>
+    </>
+  );
+};
 
 export default App;

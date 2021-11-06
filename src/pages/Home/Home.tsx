@@ -51,8 +51,15 @@ const Home: FC = () => {
   };
 
   const joinRoom = async () => {
+    const roomCodeSlice = roomCode.split('/');
+    const roomCodeParams = roomCodeSlice.length > 1 ? `${roomCodeSlice.pop() || 'undefined'}` : roomCode;
+
     if (roomCode) {
-      const docRef = doc(firestore, 'rooms', roomCode);
+      const docRef = doc(
+        firestore,
+        'rooms',
+        roomCodeParams,
+      );
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {

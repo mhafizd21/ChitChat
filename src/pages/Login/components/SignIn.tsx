@@ -3,10 +3,12 @@ import React, { FC, memo } from 'react';
 import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth';
 import { useHistory } from 'react-router-dom';
 import utils from 'config/utils';
+import useStore from 'stores/store';
 import google from '../assets/google.svg';
 
 const SignIn: FC = () => {
   const history = useHistory();
+  const afterLoginPath = useStore(s => s.afterLoginPath);
 
   const signInWithGoogle = () => {
     const provider = new GoogleAuthProvider();
@@ -14,7 +16,11 @@ const SignIn: FC = () => {
     onAuthStateChanged(auth, user => {
       if (user) {
         utils.setToken(user.uid);
-        history.push('/');
+        if (afterLoginPath) {
+          history.push(afterLoginPath);
+        } else {
+          history.push('/');
+        }
       }
     });
   };

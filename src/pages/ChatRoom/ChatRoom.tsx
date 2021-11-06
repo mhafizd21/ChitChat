@@ -25,6 +25,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import sentIcon from './assets/sent.svg';
 import ChatMessage from './components/ChatMessage';
+import noMessageImg from './assets/no-message.png';
 
 const InputStyled = styled.input`
   display: flex;
@@ -92,8 +93,8 @@ const ChatRoom: FC = () => {
           </button>
           <h1 className="text-green-600 font-black text-xl md:text-2xl">Chat Room</h1>
           <CopyToClipboard
-            text={roomId}
-            onCopy={() => Toast({ message: 'Room Id Copied!', type: 'success' })}
+            text={window.location.href}
+            onCopy={() => Toast({ message: 'Room URL Copied!', type: 'success' })}
           >
             <button type="button">
               <FaLink className="text-green-700 ml-3" />
@@ -102,7 +103,7 @@ const ChatRoom: FC = () => {
         </div>
         <SignOut />
       </header>
-      <div className="container px-5 pb-20 sm:pb-28">
+      <div className="container px-5 pb-20 sm:pb-28" style={{ minHeight: 'calc(100vh - 56px)' }}>
         {loading && <Preloader />}
         {messages?.map((message, id) => {
           const timeStamp = message?.createdAt ? new Date(message?.createdAt?.seconds * 1000) : '';
@@ -135,6 +136,14 @@ const ChatRoom: FC = () => {
             </div>
           );
         })}
+        {!loading && !messages?.length && (
+          <div className="flex items-center justify-center flex-col pt-36 sm:pt-40">
+            <img src={noMessageImg} alt="No message yet" className="w-60 sm:w-80" />
+            <p className="text-2xl sm:text-3xl text-gray-400 font-medium">
+              No messages yet
+            </p>
+          </div>
+        )}
         <div ref={scrollPoint} />
       </div>
       <div className="fixed bottom-0 w-screen bg-white sm:pb-8">

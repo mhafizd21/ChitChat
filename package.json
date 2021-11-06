@@ -22,7 +22,8 @@
     "react-icons": "^4.3.1",
     "react-router-dom": "^5.3.0",
     "react-toastify": "^8.0.3",
-    "tailwind-styled-components": "^2.0.3"
+    "tailwind-styled-components": "^2.0.3",
+    "zustand": "^3.6.4"
   },
   "devDependencies": {
     "@types/js-cookie": "^3.0.0",
