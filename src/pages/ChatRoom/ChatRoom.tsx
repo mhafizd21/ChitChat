@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import Tippy from '@tippyjs/react';
 import SignOut from 'components/Layout/SignOut';
 import Preloader from 'components/Preloader';
 import Toast from 'components/Toast';
@@ -17,15 +18,16 @@ import {
   where,
 } from 'firebase/firestore';
 import React, {
+  createRef,
   FC, memo, useEffect, useRef, useState,
 } from 'react';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useCollectionData } from 'react-firebase9-hooks/firestore';
 import { FaArrowLeft, FaLink } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
+import noMessageImg from './assets/no-message.png';
 import sentIcon from './assets/sent.svg';
 import ChatMessage from './components/ChatMessage';
-import noMessageImg from './assets/no-message.png';
 
 const InputStyled = styled.input`
   display: flex;
@@ -45,6 +47,7 @@ const ChatRoom: FC = () => {
   const [messageValue, setMessageValue] = useState('');
 
   const scrollPoint = useRef<HTMLDivElement>(null);
+  const buttonCopyRef = createRef<HTMLButtonElement>();
 
   useEffect(() => {
     const checkRoom = async () => {
@@ -88,18 +91,32 @@ const ChatRoom: FC = () => {
     <>
       <header className="sticky top-0 max-w-screen flex justify-between px-5 py-3 bg-white shadow-md z-10">
         <div className="flex items-center">
-          <button type="button" className="mr-4" onClick={() => history.push('/')}>
-            <FaArrowLeft className="text-green-700" />
-          </button>
+          <Tippy
+            content="Back to Homepage"
+            className="tooltip"
+            delay={100}
+            duration={0}
+          >
+            <button type="button" className="mr-4" onClick={() => history.push('/')}>
+              <FaArrowLeft className="text-green-700" />
+            </button>
+          </Tippy>
           <h1 className="text-green-600 font-black text-xl md:text-2xl">Chat Room</h1>
           <CopyToClipboard
             text={window.location.href}
             onCopy={() => Toast({ message: 'Room URL Copied!', type: 'success' })}
           >
-            <button type="button">
+            <button type="button" ref={buttonCopyRef}>
               <FaLink className="text-green-700 ml-3" />
             </button>
           </CopyToClipboard>
+          <Tippy
+            content="Copy Room URL"
+            className="tooltip"
+            delay={100}
+            duration={0}
+            reference={buttonCopyRef}
+          />
         </div>
         <SignOut />
       </header>
